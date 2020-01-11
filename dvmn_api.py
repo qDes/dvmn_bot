@@ -49,11 +49,10 @@ def create_message(attempt):
     result = "Работа принята."
     if is_negative:
         result = "В работе найдены ошибки. Исправьте их."
-    message = (
-        f"Урок {lesson_title} проверен.\n"
-        "\n"
-        f"{result}"
-            )
+    message = f"""Урок {lesson_title} проверен.
+                    
+{result}
+               """
     return message
 
 
