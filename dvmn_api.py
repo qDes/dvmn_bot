@@ -2,6 +2,7 @@ import telegram
 import requests
 import os
 
+from datetime import datetime
 from dotenv import load_dotenv
 from math import ceil
 from requests.exceptions import ConnectionError, ReadTimeout
@@ -14,6 +15,7 @@ def get_reviews(dvmn_token, timestamp):
     headers = {"Authorization": f"Token {dvmn_token}"}
     response = requests.get(dvmn_url, headers=headers,
                             params=payload, timeout=60)
+    response.raise_for_status()
     return response.json()
 
 
@@ -49,7 +51,7 @@ def main():
     load_dotenv()
     dvmn_token = os.environ['DVMN_TOKEN']
     tg_token = os.environ['TG_TOKEN']
-    chat_id = os.environ['ID']
+    chat_id = os.environ['TELEGRAM_CHAT_ID']
     timestamp = get_cached_timestamp()
     bot = telegram.Bot(token=tg_token)
     bot.send_message(chat_id=chat_id,
