@@ -9,6 +9,16 @@ from requests.exceptions import ConnectionError, ReadTimeout
 from time import sleep
 
 
+def get_midnight_timestamp():
+    now = datetime.now()
+    today_midnight = datetime(now.year,
+                              now.month,
+                              now.day,
+                              0, 0, 0, 0)
+    midnight_timestamp = datetime.timestamp(today_midnight)
+    return midnight_timestamp
+
+
 def get_reviews(dvmn_token, timestamp):
     dvmn_url = "https://dvmn.org/api/long_polling/"
     payload = {"timestamp": timestamp}
@@ -24,7 +34,7 @@ def get_cached_timestamp():
         with open("timestamp", 'r') as f:
             timestamp = int(f.read())
     except (FileNotFoundError, ValueError):
-        timestamp = 1578248076  # 2020-01-05T18:14:36+00:00
+        timestamp = get_midnight_timestamp()
     return timestamp
 
 
