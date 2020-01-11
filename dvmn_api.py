@@ -29,7 +29,7 @@ def get_reviews(dvmn_token, timestamp):
     return response.json()
 
 
-def get_cached_timestamp():
+def get_saved_timestamp():
     try:
         with open("timestamp", 'r') as f:
             timestamp = int(f.read())
@@ -38,7 +38,7 @@ def get_cached_timestamp():
     return timestamp
 
 
-def cache_timestamp(timestamp):
+def save_timestamp(timestamp):
     with open("timestamp", 'w') as f:
         f.write(str(timestamp))
 
@@ -62,7 +62,7 @@ def main():
     dvmn_token = os.environ['DVMN_TOKEN']
     tg_token = os.environ['TG_TOKEN']
     chat_id = os.environ['TELEGRAM_CHAT_ID']
-    timestamp = get_cached_timestamp()
+    timestamp = get_saved_timestamp()
     bot = telegram.Bot(token=tg_token)
     bot.send_message(chat_id=chat_id,
                      text="Start dvmn long polling.")
@@ -77,7 +77,7 @@ def main():
                                  text=message)
                 sleep(1)
             timestamp += 1
-            cache_timestamp(timestamp)
+            save_timestamp(timestamp)
         except ReadTimeout:
             pass
         except ConnectionError:
