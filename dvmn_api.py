@@ -24,7 +24,7 @@ def get_reviews(dvmn_token, timestamp):
     payload = {"timestamp": timestamp}
     headers = {"Authorization": f"Token {dvmn_token}"}
     response = requests.get(dvmn_url, headers=headers,
-                            params=payload, timeout=60)
+                            params=payload)
     response.raise_for_status()
     return response.json()
 
@@ -68,10 +68,15 @@ def main():
     while True:
         try:
             dvmn_resp = get_reviews(dvmn_token, timestamp)
+            status = dvmn_resp.get('status')
+            if status == 'timeout':
+                timestamp = dvmn_resp.get('time_to_request')
+                save_timestamp(timestamp)
+                continue
             new_attempts = dvmn_resp.get('new_attempts')
             for attempt in new_attempts:
                 message = create_message(attempt)
-                timestamp = ceil(int(attempt.get('timestamp')))
+                timestamp = attempt.get('timestamp')
                 bot.send_message(chat_id=chat_id,
                                  text=message)
                 sleep(1)
