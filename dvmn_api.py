@@ -81,6 +81,8 @@ def main():
             pass
         except ConnectionError:
             pass
+        except requests.exceptions.HTTPError:
+            pass
 
 
 if __name__ == "__main__":
