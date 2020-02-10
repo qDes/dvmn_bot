@@ -62,12 +62,11 @@ class MyLogsHandler(logging.Handler):
         logging.Handler.__init__(self)
         self.bot = telegram.Bot(token=token)
         self.chat_id = chat_id
-        #super().__init__()
         self.bot.send_message(chat_id=self.chat_id,
                               text="Start bot")
+    
     def emit(self, record):
         log_entry = self.format(record)
-        # тут ваша логика
         self.bot.send_message(chat_id=self.chat_id,
                               text=log_entry)
         
@@ -80,13 +79,7 @@ def main():
     logger = logging.getLogger("dvmn bot logger")
     logger.setLevel(logging.INFO)
     logger.addHandler(MyLogsHandler(tg_token, chat_id))
-    # logger.info("Я новый логер!")    
     timestamp = get_saved_timestamp()
-    '''
-    bot = telegram.Bot(token=tg_token)
-    bot.send_message(chat_id=chat_id,
-                     text="Start dvmn long polling.")
-    '''
     while True:
         try:
             dvmn_resp = get_reviews(dvmn_token, timestamp)
@@ -100,17 +93,15 @@ def main():
                 message = create_message(attempt)
                 timestamp = attempt.get('timestamp')
                 logger.info(message)
-                #bot.send_message(chat_id=chat_id,
-                #                 text=message)
                 sleep(1)
             timestamp += 1
             save_timestamp(timestamp)
         except ReadTimeout:
             pass
         except ConnectionError:
-            pass
+            logger.exception("Connection error:")
         except requests.exceptions.HTTPError:
-            pass
+            logger.exception("HTTPErorr:")
 
 
 if __name__ == "__main__":
