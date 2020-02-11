@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 from requests.exceptions import ConnectionError, ReadTimeout
+from textwrap import dedent
 from time import sleep
 
 logger = logging.getLogger("dvmn bot logger")
@@ -51,27 +52,27 @@ def create_message(attempt):
     result = "Работа принята."
     if is_negative:
         result = "В работе найдены ошибки. Исправьте их."
-    message = f"""Урок {lesson_title} проверен.
-                    
-{result}
+    message = f"""\
+    Урок {lesson_title} проверен.
+
+    {result}
                """
-    return message
+    return dedent(message)
 
 
 class TelegramLogsHandler(logging.Handler):
     def __init__(self, token, chat_id):
-        #logging.Handler.__init__(self)
         super().__init__()
         self.bot = telegram.Bot(token=token)
         self.chat_id = chat_id
         self.bot.send_message(chat_id=self.chat_id,
                               text="Start bot")
-    
+
     def emit(self, record):
         log_entry = self.format(record)
         self.bot.send_message(chat_id=self.chat_id,
                               text=log_entry)
-        
+
 
 def main():
     load_dotenv()
@@ -87,7 +88,6 @@ def main():
             status = dvmn_resp.get('status')
             if status == 'timeout':
                 timestamp = dvmn_resp.get('time_to_request')
-                print(timestamp)
                 save_timestamp(timestamp)
                 continue
             new_attempts = dvmn_resp.get('new_attempts')
@@ -96,12 +96,12 @@ def main():
                 timestamp = attempt.get('timestamp')
                 logger.info(message)
                 sleep(1)
-            timestamp += 1
             save_timestamp(timestamp)
         except ReadTimeout:
             pass
         except ConnectionError:
             logger.exception("Connection error:")
+            sleep(10)
         except requests.exceptions.HTTPError:
             logger.exception("HTTPError:")
 
