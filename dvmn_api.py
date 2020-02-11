@@ -5,9 +5,10 @@ import os
 
 from datetime import datetime
 from dotenv import load_dotenv
-from math import ceil
 from requests.exceptions import ConnectionError, ReadTimeout
 from time import sleep
+
+logger = logging.getLogger("dvmn bot logger")
 
 
 def get_midnight_timestamp():
@@ -57,9 +58,10 @@ def create_message(attempt):
     return message
 
 
-class MyLogsHandler(logging.Handler):
+class TelegramLogsHandler(logging.Handler):
     def __init__(self, token, chat_id):
-        logging.Handler.__init__(self)
+        #logging.Handler.__init__(self)
+        super().__init__()
         self.bot = telegram.Bot(token=token)
         self.chat_id = chat_id
         self.bot.send_message(chat_id=self.chat_id,
@@ -76,9 +78,8 @@ def main():
     dvmn_token = os.environ['DVMN_TOKEN']
     tg_token = os.environ['TG_TOKEN']
     chat_id = os.environ['TELEGRAM_CHAT_ID']
-    logger = logging.getLogger("dvmn bot logger")
     logger.setLevel(logging.INFO)
-    logger.addHandler(MyLogsHandler(tg_token, chat_id))
+    logger.addHandler(TelegramLogsHandler(tg_token, chat_id))
     timestamp = get_saved_timestamp()
     while True:
         try:
@@ -86,6 +87,7 @@ def main():
             status = dvmn_resp.get('status')
             if status == 'timeout':
                 timestamp = dvmn_resp.get('time_to_request')
+                print(timestamp)
                 save_timestamp(timestamp)
                 continue
             new_attempts = dvmn_resp.get('new_attempts')
@@ -101,7 +103,7 @@ def main():
         except ConnectionError:
             logger.exception("Connection error:")
         except requests.exceptions.HTTPError:
-            logger.exception("HTTPErorr:")
+            logger.exception("HTTPError:")
 
 
 if __name__ == "__main__":
